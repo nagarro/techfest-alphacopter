@@ -1,0 +1,33 @@
+.wrapper{width:800px; margin: 0px auto;}
+
+.hide{display:none;}
+
+.imgOp1{width:750px; height:400px; margin:0px auto;}
+
+.imgOp{width:750px; height:400px; display:none;}
+
+.logoDiv{padding: 0px 0px 10px 154px; font-size: 64px; font-weight:bold;}
+
+.imgLogo{vertical-align:middle;}
+
+.leftDiv{width:755px; height:405px; margin: 0px auto;}
+
+.rightDiv{padding: 10px 0px 10px 180px;}
+
+.leftButtons{float:left; padding: 20px 0px 0px 0px;}
+
+.rightButtons{float:left; width:300px; padding: 20px 0px 0px 0px;}
+
+.upBtn{padding:10px 0px 0px 55px;}
+
+.leftRightBtn{padding:5px 0px 0px 0px;}
+
+.downBtn{padding: 5px 0px 0px 50px;}
+
+.takeOffLandBtn{padding:10px 0px 0px 50px;}
+
+.frontBackBtn{padding:5px 0px 0px 50px;}
+
+.stopDEBtn{padding: 5px 0px 0px 50px;}
+
+.resDiv{clear:both; padding: 30px 0px 10px 180px;}

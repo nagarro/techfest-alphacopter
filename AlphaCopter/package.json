@@ -1,0 +1,16 @@
+{
+  "name": "AlphaCopter",
+  "version": "0.0.0",
+  "description": "AlphaCopter is a program which make Ar Drone to animate like alphabets.",
+  "main": "AlphaCopter.js",
+  "dependencies": {
+    "ar-drone": "~0.3.0",
+    "express": "~3.4.6",
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Inderpreet Singh Bindra",
+  "license": "BSD-2-Clause"
+}

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>AlphaCopter</title>
+	<link rel="stylesheet" href="css/style.css" />
+	<script src="scripts/imageProcessing.js"></script>
+</head>
+
+<body onload="enableVideoCtrl(true)">
+<div class="wrapper">
+	<div class="logoDiv">
+		<img alt="AlphaCopter Logo" src="images/aclogosmall.png" class="imgLogo"/>&nbsp;Alpha Copter<!-- <span class="heading"></span> -->
+	</div>
+	<div id="leftDiv" class="leftDiv">
+		<video id="video" class="hide" width="750px" height="400px" autoplay></video>
+		<canvas id="canvas" width="750px" height="400px" class="hide"></canvas>
+	</div>
+
+	<div class="rightDiv">
+		<div>
+			<form method="get" action="http://localhost:4000/AlphaCopter">
+			Enter an alphabet
+			<input type="text" id="txtAlphabet" name="txtAlphabet"/>
+			<input type="button" id="btnSubmit" value="Draw" width="80px" height="30px" onclick="SendAlphabet();"/>
+		</div>
+		<div class="leftButtons">
+			<div class="upBtn">
+				<input type="button" id="btnUp" value="Up" onclick="Movement('UP');"/>
+			</div>
+			<div class="leftRightBtn">
+				<input type="button" id="btnLeft" value="Left" onclick="Movement('LEFT');"/>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button" id="btnRight" value="Right" onclick="Movement('RIGHT');"/>
+			</div>
+			<div class="downBtn">
+				<input type="button" id="btnDown" value="Down" onclick="Movement('DOWN');"/>
+			</div>
+		</div>
+		<div class="rightButtons">
+			<div class="takeOffLandBtn">
+				<input type="button" id="btnTakeOff" value="Take Off" onclick="Movement('TAKEOFF');"/>
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button" id="btnLand" value="Land" onclick="Movement('LAND');"/>
+			</div>
+			<div class="frontBackBtn">
+				<input type="button" id="btnFront" value="Front"  onclick="Movement('FRONT');"/>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button" id="btnBack" value="Back" onclick="Movement('BACK');"/>
+			</div>
+			<div class="stopDEBtn">
+				<input type="button" id="btnStop" value="Stop" onclick="Movement('STOP');"/>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button" id="btnDE" value="Disable Emergency" onclick="Movement('DE');"/>
+			</div>
+		</div>
+	</div>
+	<div id="responseDiv" class="resDiv"></div>
+	
+</div>
+<script>
+  
+	var video = document.querySelector('#video');
+	var canvas = document.querySelector('#canvas');
+	var ctx = canvas.getContext('2d');
+	var responseDiv = document.getElementById("responseDiv");
+	var localMediaStream = null;
+	var currentImage = null;
+	var processedImage = null;
+
+	var flag = true;
+	var counter = 1;
+	var snapInterval = 0;
+	var snapTimeout = 0;
+	var startTime = 0;
+
+	function enableVideoCtrl(status)
+	{
+		if(status)
+		{
+			video.style.display = "block";
+		}
+		else
+		{
+			video.style.display = "none";
+		}
+	}
+	
+	function removeImages()
+	{
+		var images = document.getElementById('leftDiv').getElementsByTagName("img");
+		
+		for(var index=0; index < images.length; index++)
+		{
+			images[index].parentNode.removeChild(images[index]);
+		}
+		
+		var img1 = document.getElementById('img1');
+		if(img1)
+		{
+			img1.parentNode.removeChild(img1);
+		}
+	}
+	function snapshot() 
+	{
+		if (localMediaStream) 
+		{
+			responseDiv.innerHtml = "Start Clicking....";
+			ctx.drawImage(video, 0, 0);
+			// "image/webp" works in Chrome.
+			// Other browsers will fall back to image/png.
+			
+			currentImage = canvas.toDataURL('image/png');
+			
+			var newImg = document.createElement("img");
+			newImg.src = currentImage;
+			newImg.id = "img" + counter;
+			
+			document.getElementById('leftDiv').appendChild(newImg);
+			
+			if(counter == 1)
+			{
+				enableVideoCtrl(false);
+				newImg.className = "imgOp" + counter;
+				processedImage = newImg;
+			}
+			else
+			{
+				newImg.className = "imgOp";
+				Difference(newImg);
+			}
+			counter++;
+		}
+	}
+
+	function Difference(newImg)
+	{
+		processedImage = Pixastic.process(processedImage, "blend", 
+						{
+							amount : 1, 
+							mode : "darkercolor", 
+							image : newImg
+						});
+	}
+	// Not showing vendor prefixes or code that works cross-browser.
+	navigator.getUserMedia = navigator.getUserMedia || 
+							 navigator.webkitGetUserMedia || 
+							 navigator.mozGetUserMedia || 
+							 navigator.msGetUserMedia;
+							 
+	window.URL = window.URL || window.webkitURL;  
+
+	navigator.getUserMedia({video: true}, function(stream) 
+	{
+		video.src = window.URL.createObjectURL(stream);
+		localMediaStream = stream;
+
+	}, errorCallback);
+
+	var errorCallback = function(){ alert("Something went wrong. Please reload the page.");}
+
+
+	function SendAlphabet()
+	{
+		var alphabet = document.getElementById("txtAlphabet").value.toUpperCase();
+		processedImage = null;
+		enableVideoCtrl(true);
+		removeImages();
+		
+		var xmlhttp = null;
+
+		if (window.XMLHttpRequest)
+		{// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp = new XMLHttpRequest();
+		}
+		else
+		{// code for IE6, IE5
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange = function()
+		{
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+			{				
+				if(xmlhttp.responseText)
+				{
+					if(xmlhttp.responseText == "A")
+					{
+						startTime = 14000;
+						snapInterval = 50;
+						snapTimeout = 27200;//27100;//26400;//26900;//26400;
+					}
+					
+					else if(xmlhttp.responseText == "I")
+					{
+						startTime = 14000;
+						snapInterval = 50;
+						snapTimeout = 43600;//42700//42100;//45600;//46000;//45200;
+					}
+					
+					if(xmlhttp.responseText == "T")
+					{
+						startTime = 14000;
+						snapInterval = 50;
+						snapTimeout = 28700;//31000;//33600;//34200;//33900;
+					}
+					
+					responseDiv.innerHTML = "Animating Alphabet : " + xmlhttp.responseText;
+					
+					window.setTimeout(function()
+									  {
+											window.setInterval(function()
+															   {
+																	if(flag){snapshot()}
+															   }, snapInterval);
+									  }, startTime);
+
+					window.setTimeout(function(){flag = false; responseDiv.innerHtml = "Stop Clicking....";}, snapTimeout);
+				}
+			}
+		}
+		xmlhttp.open("GET","http://localhost:4000/AlphaCopter?txtAlphabet=" + alphabet, true);
+		xmlhttp.send();
+	}
+
+
+	function Movement(direction)
+	{
+		var xmlhttp = null;
+		
+		if (window.XMLHttpRequest)
+		{// code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp = new XMLHttpRequest();
+		}
+		else
+		{// code for IE6, IE5
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+			{
+				responseDiv.innerHTML = xmlhttp.responseText;
+			}
+		}
+		xmlhttp.open("GET","http://localhost:4000/AlphaCopter?direction=" + direction + "&speed=0.1", true);
+		xmlhttp.send();
+	}
+
+	document.onkeydown = function() 
+						{
+							switch (window.event.keyCode) {
+								
+								case 8:
+									Movement("LAND");
+									break;
+								case 13:
+									Movement("TAKEOFF");
+									break;
+								case 17:
+									Movement("FRONT");
+									break;
+								case 18:
+									Movement("BACK");
+									break;
+								case 32:
+									Movement("STOP");
+									break;
+								case 37:
+									Movement("LEFT");
+									break;
+								case 38:
+									Movement("UP");
+									break;
+								case 39:
+									Movement("RIGHT");
+									break;
+								case 40:
+									Movement("DOWN");
+									break;
+								case 90:
+								case 126:
+									Movement("DE");
+									break;
+								
+							}
+						};
+</script>
+</body>
+</html>
